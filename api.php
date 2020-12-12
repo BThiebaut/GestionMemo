@@ -4,37 +4,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 const MAX_BACKUPS = 3;
 
-$users =[
-    "bthiebaut" => '$2y$10$N8MAuft.DuTnRPDLEbf3/umTXb1VEJyf2u7Q9GWHNW1P.pvz5kYv2',
-    "Sici" => '$2y$10$N7ZJfEYpmI3vIo18qsewYODgTykG6GC6k9P7zluzCxy9K37pohF9i'
-];
-
-function cors() {
-    
-    // Allow from any origin
-    if (isset($_SERVER['HTTP_ORIGIN'])) {
-        // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
-        // you want to allow, and if so:
-        header("Access-Control-Allow-Origin: *");
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Max-Age: 86400');    // cache for 1 day
-    }
-    
-    // Access-Control headers are received during OPTIONS requests
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-        
-        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
-            // may also be using PUT, PATCH, HEAD etc
-            header("Access-Control-Allow-Methods: GET, POST, OPTIONS");         
-        
-        if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
-            header("Access-Control-Allow-Headers: *");
-    
-        exit(0);
-    }
-    
-    echo "You have CORS!";
-}
+require_once('./src/assets/db/db.php');
 
 function getConfig(){
     $config = $_GET['memo'];
@@ -119,7 +89,8 @@ if (!isset($_SERVER['HTTP_X_AUTH_TOKEN'])){
 }
 $auth = $_SERVER['HTTP_X_AUTH_TOKEN'];
 $userpw = explode(':', base64_decode($auth));
-if (!isset($users[$userpw[0]]) || !password_verify($userpw[1], $users[$userpw[0]])){
+
+if (!isset(USERS[$userpw[0]]) || !password_verify($userpw[1], USERS[$userpw[0]])){
     http_response_code(403);
     exit;
 }
