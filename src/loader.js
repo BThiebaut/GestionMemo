@@ -102,9 +102,17 @@ function Loader(container){
                 },
                 processPut : function(){
                     var datas = {};
-                    for(var i in this.config){
+                    for(let i in this.config){
+                        let cat = this.config[i];
+                        datas[cat.value] = [];
 
+                        for(let j in cat.childs){
+                            let val = cat.childs[j];
+                            datas[cat.value].push(val.value);
+                        }
                     }
+
+                    console.log(datas);
                 }
             },
         })
