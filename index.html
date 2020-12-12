@@ -7,6 +7,7 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="./src/assets/libs/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./src/assets/libs/notify/vanilla-notify.css">
     <link rel="stylesheet" href="./src/assets/style.css">
     <title>Memo</title>
   </head>
@@ -56,9 +57,13 @@
             </li>
           </ul>
         </div>
-
+        <div class="float-right">
+          <button v-if="cacheAuth" v-on:click="logout()" class="btn btn-outline-danger my-2 my-sm-0" type="button">
+            Déconnexion
+          </button>
+        </div>
         <div class="config" v-if="config !== null">
-          <div class="text-center"><h1>{{ memoName }}</h1></div>
+          <div class="text-center memo-title"><h1>{{ memoName }}</h1></div>
           <div class="row">
             <div class="col-6">
               <input class="form-control mr-sm-2" v-model="searchcategory" type="text" placeholder="Rechercher une catégorie" v-on:keyup="search('category')"/>
@@ -69,28 +74,70 @@
           </div>
           <div class="config-values">
             <div class="alert alert-danger" v-if="noresult">Aucun résultat</div>
-            <li v-for="category in config" class="search-category filterable" v-bind:data-value="category.value.toLowerCase()">
-              <span v-show="!category.edit">{{ category.value }} <i class="fa fa-pencil" v-on:dblclick="edit($event, category)"></i> :</span>
+
+            <li><i class="fa fa-plus text-success" v-on:dblclick="toggleAddInput()"></i></li>
+            <li v-if="addCat"><input type="text" v-model="addInputCat" @keyup="add($event)"></li>
+
+            <li v-for="category in config" class="search-category filterable" v-bind:data-value="category.value.toLowerCase()" v-if="!category.deleted">
+              <span v-show="!category.edit">
+                <span v-on:dblclick="copy">{{ category.value }}</span>
+                  <i class="fa fa-pencil" v-on:dblclick="edit($event, category)"></i> 
+                  <i class="fa fa-times text-danger" v-on:dblclick="deleteInput($event, category)"></i> 
+                :</span>
               <input type="text" v-show="category.edit" v-model="category.value" @keyup="submit($event, category)"/>
                 <ul>
-                  <li v-for="child in category.childs" class="search-value filterable" v-bind:data-value="child.value.toLowerCase()">
-                    <span v-show="!child.edit">{{ child.value }} <i class="fa fa-pencil" v-on:dblclick="edit($event, child)"></i></span>
+                  <li v-for="child in category.childs" class="search-value filterable" v-bind:data-value="child.value.toLowerCase()" v-if="!child.deleted">
+                    <span v-show="!child.edit">
+                      <span v-on:dblclick="copy">{{ child.value }}</span>
+                        <i class="fa fa-pencil" v-on:dblclick="edit($event, child)"></i>
+                        <i class="fa fa-times text-danger" v-on:dblclick="deleteInput($event, category, child)"></i> 
+                    </span>
                     <input type="text" v-show="child.edit" v-model="child.value" @keyup="submit($event, child)"/>
                   </li>
+
+                  <li><i class="fa fa-plus text-success" v-on:dblclick="toggleAddInput(category)"></i></li>
+                  <li v-if="category.add"><input type="text" v-model="addInput" @keyup="add($event, category.value)"></li>
+
                 </ul>
             </li>
           </div>
         </div>
-
+        
+        <div class="modal fade" id="authModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Connexion</h5>
+              </div>
+              <div class="modal-body" @keyup.enter="validateUser()">
+                <div class="form-group">
+                  <label for="user">Identifiant</label>
+                  <input type="text" class="form-control" name="user" v-model="username">
+                </div>
+                <div class="form-group">
+                  <label for="password">Mot de passe</label>
+                  <input type="password" class="form-control" name="password" v-model="password">
+                </div>
+                <div class="alert alert-danger" v-if="authError">Identifiant ou mot de passe incorrect</div>
+              </div>
+              <div class="modal-footer text-center">
+                <button type="button" class="btn btn-primary" v-on:click="validateUser()">Valider</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
+
+   
+
     <!-- built files will be auto injected -->
 
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="./src/assets/libs/notify/notify.min.js"></script>
+    <script src="./src/assets/libs/notify/vanilla-notify.min.js"></script>
     <script src="./src/loader.js"></script>
 
     <script>

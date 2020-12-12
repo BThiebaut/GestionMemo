@@ -15,3 +15,15 @@ main {
 .filterable i {
   font-size: 12px !important;
 }
+
+i {
+  cursor: pointer;
+}
+
+.vnotify-container {
+  margin-top: 50px !important;
+}
+
+.memo-title {
+  margin-left: 100px;
+}
