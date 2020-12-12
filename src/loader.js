@@ -1,7 +1,8 @@
 function Loader(container){
     this.container = container;
     this.configName = "";
-    this.app = null;
+    this.jsonResponse = null;
+    this.appVue = null;
     
     this.apiUrlConfig = 'https://memo.thiebaut.me/index.php';
     self = this;
@@ -15,7 +16,7 @@ function Loader(container){
             self.configName = "";
         }
 
-        self.app = new Vue({
+        self.appVue = new Vue({
             el : self.container,
             data : {
                 config : null,
@@ -23,6 +24,7 @@ function Loader(container){
                 searchcategory : "",
                 searchvalue : "",
                 noresult : false,
+                memoName : "",
             },
             mounted : function(){
                 this.loadConfig();
@@ -38,6 +40,7 @@ function Loader(container){
                     .then(function(jsonResponse) {
                         if (self.configName !== ""){
                             let result = {};
+                            tthis.memoName = jsonResponse.name;
                             for(var i in jsonResponse.datas){
                                 var val = jsonResponse.datas[i];
                                 result[i] = {
@@ -57,10 +60,10 @@ function Loader(container){
                                 }
                             }
                             tthis.config = result;
-                            console.log(tthis.config);
                         }else {
                             tthis.configList = jsonResponse;
                         }
+                        self.jsonResponse = jsonResponse;
                     });
                 },
                 search : function(cat){
@@ -97,7 +100,11 @@ function Loader(container){
                     }else if (e.keyCode == 13) {
                         model.initial = ""+model.value;
                         model.edit = false;
-                        this.processPut();
+                        this.processPut().then(res => {
+                            $.notify("Liste mise à jour", "success");
+                        }).catch(err => {
+                            $.notify("Echec de la mise à jour", "error");
+                        });
                     }
                 },
                 processPut : function(){
@@ -111,8 +118,17 @@ function Loader(container){
                             datas[cat.value].push(val.value);
                         }
                     }
+                    var json = {
+                        name : self.jsonResponse.name,
+                        datas : datas
+                    };
+                    
+                    var url = self.apiUrlConfig+'?memo=' + self.configName;
+                    return fetch(url, {
+                        method: 'PUT',
+                        body : JSON.stringify(json)
+                    }).then(res => res.status);
 
-                    console.log(datas);
                 }
             },
         })

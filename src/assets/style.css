@@ -11,3 +11,7 @@ main {
   margin-left: 15px;
   margin-top: 20px;
 }
+
+.filterable i {
+  font-size: 12px !important;
+}
