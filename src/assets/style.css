@@ -1,0 +1,13 @@
+body {
+  background: #181a1b;
+  color: #fff;
+}
+
+main {
+  margin-top: 70px;
+}
+
+.config-values {
+  margin-left: 15px;
+  margin-top: 20px;
+}

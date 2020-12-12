@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="./src/assets/libs/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./src/assets/style.css">
+    <title>Memo</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>JS nécessaire</strong>
+    </noscript>
+    <header>
+      <!-- Fixed navbar -->
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" id="navbar">
+        <a class="navbar-brand" href="/">Memo</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarCollapse"
+          aria-controls="navbarCollapse"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+          <ul class="navbar-nav mr-auto">
+          </ul>
+          <form class="form-inline mt-2 mt-md-0">
+            <input
+              class="form-control mr-sm-2"
+              type="text"
+              placeholder="Rechercher un mémo"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
+              Rechercher
+            </button>
+          </form>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+      <div id="app">
+        <div class="config-list" v-if="config === null && configList !== null">
+          <h1>Liste des mémos disponibles</h1>
+          <ul class="list-unstyled">
+            <li v-for="conf in configList">
+              <a v-bind:href="'https://memo.thiebaut.me?memo=' + conf">{{ conf }}</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="config" v-if="config !== null">
+          <div class="row">
+            <div class="col-6">
+              <input class="form-control mr-sm-2" v-model="searchcategory" type="text" placeholder="Rechercher une catégorie" v-on:keyup="search('category')"/>
+            </div>
+            <div class="col-6">
+              <input class="form-control mr-sm-2" v-model="searchvalue" type="text" placeholder="Rechercher une valeur" v-on:keyup="search('value')"/>
+            </div>
+          </div>
+          <div class="config-values">
+            <div class="alert alert-danger" v-if="noresult">Aucun résultat</div>
+            <li v-for="category in config" class="search-category filterable" v-bind:data-value="category.value.toLowerCase()">
+              <span v-show="!category.edit">{{ category.value }} <i class="fa fa-pencil" v-on:dblclick="edit($event, category)"></i> :</span>
+              <input type="text" v-show="category.edit" v-model="category.value" @keyup="submit($event, category)"/>
+                <ul>
+                  <li v-for="child in category.childs" class="search-value filterable" v-bind:data-value="child.value.toLowerCase()">
+                    <span v-show="!child.edit">{{ child.value }} <i class="fa fa-pencil" v-on:dblclick="edit($event, child)"></i></span>
+                    <input type="text" v-show="child.edit" v-model="child.value" @keyup="submit($event, child)"/>
+                  </li>
+                </ul>
+            </li>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <!-- built files will be auto injected -->
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../src/loader.js"></script>
+
+    <script>
+      $(function(){
+        var loader = new Loader('#app');
+        loader.app();
+      });
+    </script>
+  </body>
+</html>
